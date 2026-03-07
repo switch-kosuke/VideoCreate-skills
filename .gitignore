@@ -1,0 +1,37 @@
+# 環境変数・機密情報
+.env
+
+# パイプライン生成ファイル（コミット不要）
+data/spinoff_store.json
+data/selected_item.json
+data/script_*.json
+data/audio_manifest.json
+data/render_props.json
+
+# メディアアセット（容量大）
+assets/scene_*/
+assets/hook/
+assets/outro/
+assets/bgm/
+assets/manifest.json
+audio/
+tmp/
+output/
+logs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Node.js / Remotion
+node_modules/
+remotion/node_modules/
+*.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db
