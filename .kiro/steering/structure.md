@@ -8,8 +8,8 @@
 
 ### Pipeline Scripts
 **Location**: `scripts/`
-**Purpose**: 各パイプラインステップのPython実装（Step 1・4・5・7）
-**Example**: `step1_scrape.py`・`step4_fetch_assets.py`・`step5_voice.py`・`step7_postprocess.py`
+**Purpose**: 各パイプラインステップのPython実装（Step 1・4・5・6準備・7）
+**Example**: `step1_scrape.py`・`step4_fetch_assets.py`・`step5_voice.py`・`step6_prepare_render.py`・`step7_postprocess.py`
 **Convention**: `step{N}_{動詞}_{対象}.py` の命名。CLIは `argparse` で引数定義
 
 ### Remotion Video Project

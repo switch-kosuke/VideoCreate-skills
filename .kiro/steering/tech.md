@@ -56,6 +56,9 @@ python scripts/step4_fetch_assets.py --script data/script_{id}.json
 # Step 5: 音声生成
 python scripts/step5_voice.py --script data/script_{id}.json
 
+# Step 6: render_props.json 生成（3マニフェストマージ）
+python scripts/step6_prepare_render.py --id {id}
+
 # Step 6: 動画レンダリング
 npx remotion render remotion/src/index.ts NasaSpinoffVideo --props data/render_props.json --output tmp/render_{id}.mp4
 
