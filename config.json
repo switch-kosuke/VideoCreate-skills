@@ -1,0 +1,25 @@
+{
+  "base_url": "https://spinoff.nasa.gov",
+  "list_selector": "a.feature",
+  "detail_title_selector": "h1 .field--name-title",
+  "detail_summary_selector": ".field--name-body",
+  "detail_category_selector": "img.category-banner",
+  "user_agent": "NASA-Spinoff-VideoBot/1.0",
+  "request_delay_min": 1,
+  "request_delay_max": 2,
+  "category_map": {
+    "medical": "医療",
+    "health and medicine": "医療",
+    "consumer/home/recreation": "日用品",
+    "transportation": "日用品",
+    "food": "食品",
+    "food and nutrition": "食品",
+    "environment/agriculture": "環境",
+    "environment": "環境",
+    "information technology": "その他",
+    "industrial productivity": "その他",
+    "public safety": "その他",
+    "energy and environment": "環境",
+    "energy": "環境"
+  }
+}

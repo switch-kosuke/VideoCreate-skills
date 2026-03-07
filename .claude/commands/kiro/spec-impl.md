@@ -63,6 +63,9 @@ For each selected task, follow Kent Beck's TDD cycle:
 
 5. **MARK COMPLETE**:
    - Update checkbox from `- [ ]` to `- [x]` in tasks.md
+   - Close the corresponding GitHub Issue by running:
+     `python scripts/close_issue.py <issue_number> "<task_name> 実装完了 (tests: N/N passed)"`
+   - The issue number matches the top-level task number (e.g., Task 2 → Issue #2)
 
 ## Critical Constraints
 - **TDD Mandatory**: Tests MUST be written before implementation code
