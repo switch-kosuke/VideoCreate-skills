@@ -115,7 +115,7 @@ python scripts/step2_save_selection.py --url "<選択したレコードのURL>" 
       "voiceover_en": "（英語ナレーション — 自然な意訳）",
       "visual_note": "（ビジュアル説明）",
       "image_keywords": ["英語キーワード1", "英語キーワード2"],
-      "duration_sec": 10
+      "duration_sec": 7
     }
   ],
   "outro": "（日本語アウトロ — チャンネル登録促進）",
@@ -125,11 +125,30 @@ python scripts/step2_save_selection.py --url "<選択したレコードのURL>" 
 ```
 
 **生成ルール:**
-- 口調: 「親しみやすく、驚きを演出するテンポ感」
+- 口調: 「テンポよく畳み掛ける雑学ショート動画スタイル」— 一文一事実、断定調、体言止め多用
 - 英語テキスト: 直訳ではなく英語圏視聴者に自然な意訳
 - `title` は 25 文字以内
 - `image_keywords` は 2〜4 語の英語キーワード
 - `total_duration_sec` = シーン合計 + hook(3秒) + outro(5秒)
+
+**テンポ・構成ルール（重要）:**
+- シーン数: **6〜8シーン**（1シーンにつき1事実を完結させる）
+- 1シーンあたりの `duration_sec`: **6〜8秒**（長くても9秒まで）
+- voiceover は **25〜40文字**（読み上げ約3〜5秒）。1シーンに詰め込みすぎない
+- 文末は「〜です。」より「〜なんです！」「〜なんだ。」「実は〜。」など感情を乗せる
+- シーン間に「驚き→説明→驚き→深掘り→まとめ」の感情の波を作る
+- hook は視聴者が「え？」となる疑問形か衝撃の一言（例:「あなたの枕、実はNASA製かも？」）
+- outro は「もっと雑学が見たい人はフォロー！」など短く強く締める（20文字以内）
+
+**悪い例（やってはいけない）:**
+- ❌ 1シーンに2〜3文を詰め込む「〜です。〜があります。〜しています。」
+- ❌ 「〜という技術が開発されました」のような説明的な長文
+- ❌ duration_sec が10秒超え
+
+**良い例:**
+- ✅ Scene 1（7秒）:「実はビールの泡、宇宙技術で作られてるって知ってた？」
+- ✅ Scene 2（6秒）:「NASAが開発した圧力制御システム。それがビール工場に転用された。」
+- ✅ Scene 3（7秒）:「均一な泡立ち＝飲み心地の革命。コレ、全部NASAのおかげ。」
 
 ### 3-3. ユーザー提示・承認ループ（最大3回）
 
@@ -190,7 +209,7 @@ python scripts/step4_fetch_assets.py --script data/script_<item_id>.json
 ```
 
 - APIキーは `.env` の `PEXELS_API_KEY` から自動読み込みされる
-- 期待出力: `assets/manifest.json`、`assets/scene_*/`・`assets/hook/`・`assets/outro/` ディレクトリ
+- 期待出力: `assets/<item_id>/manifest.json`、`assets/<item_id>/scene_*/`・`assets/<item_id>/hook/`・`assets/<item_id>/outro/` ディレクトリ
 
 スクリプトが非ゼロ終了した場合:
 > ❌ Step 4 失敗: [エラー内容]
@@ -209,8 +228,10 @@ python scripts/step5_voice.py --script data/script_<item_id>.json
 ```
 
 - デフォルトボイス: JA=`ja-JP-NanamiNeural` / EN=`en-US-JennyNeural`
+- デフォルト速度: `+25%`（速め。変更する場合は `--rate +40%` などを追加）
 - カスタムボイスを使う場合: `--ja-voice <voice>` / `--en-voice <voice>` を追加
 - 期待出力: `audio/ja/scene_*.mp3`・`audio/en/scene_*.mp3`・`data/audio_manifest.json`
+- 各音声ファイルの実測長を manifest に記録し、Step 6 でシーン尺を自動調整する
 
 スクリプトが非ゼロ終了した場合:
 > ❌ Step 5 失敗: [エラー内容]
@@ -232,6 +253,8 @@ python scripts/step6_prepare_render.py --id <item_id> --lang ja
 
 - 期待出力: `data/render_props.json`（script + audio_manifest + assets_manifest のマージ）
 - `--lang en` にすると英語音声トラックで生成される
+- 音声の実測長に基づき script の `duration_sec` を自動調整する
+- `assets/<item_id>/` と `audio/` を `remotion/public/` に自動同期する
 
 スクリプトが非ゼロ終了した場合（不足ファイルのパスが明示される）:
 > ❌ Step 6-1 失敗: [不足ファイルパス]

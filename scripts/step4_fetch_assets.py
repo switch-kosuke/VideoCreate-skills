@@ -252,7 +252,7 @@ def main() -> int:
     if not pexels_api_key:
         logger.warning("PEXELS_API_KEY が未設定です。Pexels フォールバックは無効になります")
 
-    assets_root = PROJECT_ROOT / "assets"
+    assets_root = PROJECT_ROOT / "assets" / item_id
     manifest_path = assets_root / "manifest.json"
 
     session = requests.Session()

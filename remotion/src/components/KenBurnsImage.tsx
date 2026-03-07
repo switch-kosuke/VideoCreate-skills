@@ -2,7 +2,7 @@
  * 7.1 KenBurnsImage — 静止画にゆっくりズーム/パンエフェクト（ケンバーンズ）
  */
 import React from "react";
-import { AbsoluteFill, Img, useCurrentFrame, interpolate } from "remotion";
+import { AbsoluteFill, Img, useCurrentFrame, interpolate, staticFile } from "remotion";
 
 interface KenBurnsImageProps {
   src: string;
@@ -36,7 +36,7 @@ export const KenBurnsImage: React.FC<KenBurnsImageProps> = ({
   return (
     <AbsoluteFill style={{ overflow: "hidden" }}>
       <Img
-        src={src}
+        src={staticFile(src)}
         alt={alt}
         style={{
           width: "100%",

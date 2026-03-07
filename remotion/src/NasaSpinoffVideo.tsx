@@ -5,7 +5,7 @@
  * hook → scenes → outro の順で各シーンコンポーネントをシーケンス表示する。
  */
 import React from "react";
-import { AbsoluteFill, Sequence, Audio, useVideoConfig } from "remotion";
+import { AbsoluteFill, Sequence, Audio, useVideoConfig, staticFile } from "remotion";
 import { VideoCompositionProps } from "./types";
 import { calcSceneFrames, getAssetForScene, getAudioForScene } from "./utils";
 import { HookScene } from "./components/HookScene";
@@ -42,7 +42,7 @@ export const NasaSpinoffVideo: React.FC<VideoCompositionProps> = ({
           startFrame={frames.hook.start}
           durationFrames={frames.hook.durationFrames}
         />
-        {hookAudio && <Audio src={hookAudio} />}
+        {hookAudio && <Audio src={staticFile(hookAudio)} />}
       </Sequence>
 
       {/* Content シーン群 */}
@@ -67,7 +67,7 @@ export const NasaSpinoffVideo: React.FC<VideoCompositionProps> = ({
               startFrame={sceneFrames.start}
               durationFrames={sceneFrames.durationFrames}
             />
-            {audio && <Audio src={audio} />}
+            {audio && <Audio src={staticFile(audio)} />}
           </Sequence>
         );
       })}
@@ -84,7 +84,7 @@ export const NasaSpinoffVideo: React.FC<VideoCompositionProps> = ({
           startFrame={frames.outro.start}
           durationFrames={frames.outro.durationFrames}
         />
-        {outroAudio && <Audio src={outroAudio} />}
+        {outroAudio && <Audio src={staticFile(outroAudio)} />}
       </Sequence>
     </AbsoluteFill>
   );

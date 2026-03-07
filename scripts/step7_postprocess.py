@@ -183,7 +183,7 @@ def main() -> int:
         )
         return 1
 
-    bgm_dir = PROJECT_ROOT / "assets" / "bgm"
+    bgm_dir = PROJECT_ROOT / "assets" / item_id / "bgm"
     output_dir = PROJECT_ROOT / "output"
     output_dir.mkdir(parents=True, exist_ok=True)
 

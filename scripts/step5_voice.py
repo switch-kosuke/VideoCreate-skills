@@ -14,6 +14,7 @@ import argparse
 import asyncio
 import json
 import logging
+import subprocess
 import sys
 import time
 from datetime import datetime, timezone
@@ -28,6 +29,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_JA_VOICE = "ja-JP-NanamiNeural"
 DEFAULT_EN_VOICE = "en-US-JennyNeural"
+DEFAULT_RATE = "+25%"  # TTS読み上げ速度（デフォルト25%速く）
 
 SCENE_SLEEP_SEC = 0.5  # シーン間スリープ（レート制限対策）
 
@@ -115,10 +117,23 @@ def save_audio_manifest(manifest: dict, output_path: Path) -> None:
 
 # ---- 音声生成 ----
 
-async def generate_audio(text: str, voice: str, output_path: Path) -> None:
+def get_audio_duration(path: Path) -> float:
+    """ffprobe で MP3 の実際の再生時間（秒）を返す。失敗時は 0.0"""
+    try:
+        result = subprocess.run(
+            ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", str(path)],
+            capture_output=True, text=True, timeout=10,
+        )
+        data = json.loads(result.stdout)
+        return float(data["format"]["duration"])
+    except Exception:
+        return 0.0
+
+
+async def generate_audio(text: str, voice: str, output_path: Path, rate: str = DEFAULT_RATE) -> None:
     """edge-tts で text を voice を使って output_path に MP3 として保存する"""
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    communicate = edge_tts.Communicate(text, voice)
+    communicate = edge_tts.Communicate(text, voice, rate=rate)
     await communicate.save(str(output_path))
 
 
@@ -126,24 +141,31 @@ async def generate_all_audio(
     manifest: dict,
     ja_voice: str,
     en_voice: str,
+    rate: str = DEFAULT_RATE,
 ) -> None:
-    """全シーンの JA・EN 音声を順次生成する（シーン間に sleep を挿入）"""
+    """全シーンの JA・EN 音声を順次生成し、実測 duration_sec を manifest に記録する"""
     for i, scene in enumerate(manifest["scenes"]):
         scene_id = scene["scene_id"]
 
         logger.info(f"  [JA] scene={scene_id}")
         try:
-            await generate_audio(scene["ja_text"], ja_voice, Path(scene["ja_path"]))
+            await generate_audio(scene["ja_text"], ja_voice, Path(scene["ja_path"]), rate)
         except Exception as e:
             logger.error(f"JA 音声生成失敗 (scene={scene_id}): {e}")
             raise
 
         logger.info(f"  [EN] scene={scene_id}")
         try:
-            await generate_audio(scene["en_text"], en_voice, Path(scene["en_path"]))
+            await generate_audio(scene["en_text"], en_voice, Path(scene["en_path"]), rate)
         except Exception as e:
             logger.error(f"EN 音声生成失敗 (scene={scene_id}): {e}")
             raise
+
+        # 実際の音声長を計測して記録（JA/EN の長い方をシーン尺として採用）
+        ja_dur = get_audio_duration(Path(scene["ja_path"]))
+        en_dur = get_audio_duration(Path(scene["en_path"]))
+        scene["ja_duration_sec"] = round(ja_dur, 2)
+        scene["en_duration_sec"] = round(en_dur, 2)
 
         if i < len(manifest["scenes"]) - 1:
             await asyncio.sleep(SCENE_SLEEP_SEC)
@@ -156,6 +178,7 @@ def main() -> int:
     parser.add_argument("--script", required=True, help="台本 JSON ファイルパス")
     parser.add_argument("--ja-voice", default=DEFAULT_JA_VOICE, help=f"JA ボイス名（デフォルト: {DEFAULT_JA_VOICE}）")
     parser.add_argument("--en-voice", default=DEFAULT_EN_VOICE, help=f"EN ボイス名（デフォルト: {DEFAULT_EN_VOICE}）")
+    parser.add_argument("--rate", default=DEFAULT_RATE, help="読み上げ速度 (例: +40%% / -10%%, デフォルト: +25%%)")
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -181,9 +204,9 @@ def main() -> int:
     audio_root = PROJECT_ROOT / "audio"
     manifest = build_audio_manifest(script, args.ja_voice, args.en_voice, audio_root)
 
-    logger.info(f"音声生成開始: {len(manifest['scenes'])} シーン × 2言語")
+    logger.info(f"音声生成開始: {len(manifest['scenes'])} シーン × 2言語 (rate={args.rate})")
     try:
-        asyncio.run(generate_all_audio(manifest, args.ja_voice, args.en_voice))
+        asyncio.run(generate_all_audio(manifest, args.ja_voice, args.en_voice, args.rate))
     except Exception as e:
         logger.error(f"音声生成中断: {e}")
         return 1
