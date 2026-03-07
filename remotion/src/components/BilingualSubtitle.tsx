@@ -35,7 +35,7 @@ export const BilingualSubtitle: React.FC<BilingualSubtitleProps> = ({
       style={{
         justifyContent: "flex-end",
         alignItems: "center",
-        paddingBottom: 80,
+        paddingBottom: 280,
       }}
     >
       <div

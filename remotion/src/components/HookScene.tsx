@@ -56,25 +56,82 @@ export const HookScene: React.FC<HookSceneProps> = ({
       {/* 暗いオーバーレイ */}
       <AbsoluteFill style={{ backgroundColor: "rgba(0,0,0,0.45)" }} />
 
-      {/* フックテキスト（中央・大きめ） */}
+      {/* フックテキスト（フルワイド・インパクトデザイン） */}
       <AbsoluteFill
-        style={{ justifyContent: "center", alignItems: "center", padding: 48 }}
+        style={{ justifyContent: "center", alignItems: "stretch", padding: "0 40px" }}
       >
-        <p
+        <div
           style={{
-            fontSize: 72,       // BilingualSubtitle の 1.5倍以上（52 * 1.5 ≈ 78 → 72以上）
-            color: "white",
-            fontWeight: "bold",
-            textShadow: "0 4px 16px rgba(0,0,0,0.95)",
-            textAlign: "center",
-            lineHeight: 1.3,
-            margin: 0,
             opacity,
             transform: `scale(${scale})`,
+            backgroundColor: "rgba(0,0,0,0.72)",
+            borderRadius: 16,
+            borderLeft: "10px solid #FFE500",
+            boxShadow: "0 0 40px rgba(0,0,0,0.8), inset 0 0 60px rgba(255,229,0,0.04)",
+            paddingTop: 44,
+            paddingBottom: 44,
+            paddingLeft: 44,
+            paddingRight: 44,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
           }}
         >
-          {displayText}
-        </p>
+          {/* アクセントバー（上） */}
+          <div
+            style={{
+              width: "100%",
+              height: 4,
+              background: "linear-gradient(to right, #FFE500, transparent)",
+              marginBottom: 28,
+            }}
+          />
+          {/* 日本語メインテキスト */}
+          <p
+            style={{
+              fontSize: 66,
+              color: "#FFE500",
+              fontWeight: "bold",
+              textShadow: [
+                "-3px -3px 0 #000",
+                " 3px -3px 0 #000",
+                "-3px  3px 0 #000",
+                " 3px  3px 0 #000",
+                "0 0 24px rgba(255,229,0,0.5)",
+              ].join(","),
+              textAlign: "left",
+              lineHeight: 1.4,
+              margin: 0,
+              letterSpacing: "0.02em",
+            }}
+          >
+            {text}
+          </p>
+          {/* 英語サブテキスト */}
+          <p
+            style={{
+              fontSize: 34,
+              color: "rgba(255,255,255,0.85)",
+              fontWeight: "bold",
+              textShadow: "0 2px 8px rgba(0,0,0,0.9)",
+              textAlign: "left",
+              lineHeight: 1.4,
+              margin: "16px 0 0",
+              letterSpacing: "0.01em",
+            }}
+          >
+            {text_en}
+          </p>
+          {/* アクセントバー（下） */}
+          <div
+            style={{
+              width: "100%",
+              height: 4,
+              background: "linear-gradient(to right, #FFE500, transparent)",
+              marginTop: 28,
+            }}
+          />
+        </div>
       </AbsoluteFill>
     </AbsoluteFill>
   );

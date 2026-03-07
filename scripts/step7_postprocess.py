@@ -27,8 +27,8 @@ load_dotenv(PROJECT_ROOT / ".env")
 
 logger = logging.getLogger(__name__)
 
-PIXABAY_MUSIC_API = "https://pixabay.com/api/music/"
-BGM_QUERIES = ["space ambient", "epic cinematic"]
+JAMENDO_API = "https://api.jamendo.com/v3.0/tracks/"
+BGM_TAGS = ["ambient", "cinematic"]
 BGM_MIN_DURATION = 30  # 秒
 
 
@@ -45,21 +45,21 @@ def build_bgm_path(filename: str, bgm_dir: Path) -> Path:
     return bgm_dir / f"bgm_{filename}"
 
 
-# ---- Pixabay レスポンスパース ----
+# ---- Jamendo レスポンスパース ----
 
-def parse_pixabay_response(data: dict) -> Optional[tuple]:
-    """Pixabay Music API レスポンスから (audio_url, filename) を返す。結果なしは None"""
+def parse_jamendo_response(data: dict) -> Optional[tuple]:
+    """Jamendo API レスポンスから (audio_url, filename) を返す。結果なしは None"""
     try:
-        hits = data.get("hits", [])
-        if not hits:
+        results = data.get("results", [])
+        if not results:
             return None
-        first = hits[0]
-        audio_url = first.get("audio", "")
+        first = results[0]
+        audio_url = first.get("audiodownload", "") or first.get("audio", "")
         if not audio_url:
             return None
-        filename = urlparse(audio_url).path.split("/")[-1]
-        if not filename:
-            filename = f"bgm_{first.get('id', 'track')}.mp3"
+        track_id = first.get("id", "track")
+        name = first.get("name", f"bgm_{track_id}").replace(" ", "_")
+        filename = f"{track_id}_{name}.mp3"
         return audio_url, filename
     except Exception:
         return None
@@ -75,24 +75,28 @@ def find_cached_bgm(bgm_dir: Path) -> Optional[Path]:
     return mp3s[0] if mp3s else None
 
 
-# ---- Pixabay BGM 取得 ----
+# ---- Jamendo BGM 取得 ----
 
-def fetch_bgm_from_pixabay(
-    api_key: str,
+def fetch_bgm_from_jamendo(
+    client_id: str,
     bgm_dir: Path,
     session: requests.Session,
 ) -> Optional[Path]:
-    """Pixabay Music API で BGM を検索・ダウンロードして Path を返す"""
-    for query in BGM_QUERIES:
+    """Jamendo API で BGM を検索・ダウンロードして Path を返す"""
+    for tag in BGM_TAGS:
         try:
             params = {
-                "key": api_key,
-                "q": query,
-                "min_duration": BGM_MIN_DURATION,
+                "client_id": client_id,
+                "format": "json",
+                "limit": 5,
+                "tags": tag,
+                "audiodlformat": "mp32",
+                "order": "popularity_total",
+                "durationbetween": f"{BGM_MIN_DURATION}_300",
             }
-            resp = session.get(PIXABAY_MUSIC_API, params=params, timeout=15)
+            resp = session.get(JAMENDO_API, params=params, timeout=15)
             resp.raise_for_status()
-            result = parse_pixabay_response(resp.json())
+            result = parse_jamendo_response(resp.json())
             if not result:
                 continue
 
@@ -100,14 +104,14 @@ def fetch_bgm_from_pixabay(
             bgm_path = build_bgm_path(filename, bgm_dir)
             bgm_dir.mkdir(parents=True, exist_ok=True)
 
-            audio_resp = session.get(audio_url, timeout=30)
+            audio_resp = session.get(audio_url, timeout=60)
             audio_resp.raise_for_status()
             bgm_path.write_bytes(audio_resp.content)
-            logger.info(f"  [Pixabay] BGM 取得: {bgm_path.name}")
+            logger.info(f"  [Jamendo] BGM 取得: {bgm_path.name}")
             return bgm_path
 
         except Exception as e:
-            logger.warning(f"  Pixabay BGM 取得失敗 (query={query}): {e}")
+            logger.warning(f"  Jamendo BGM 取得失敗 (tag={tag}): {e}")
 
     return None
 
@@ -129,16 +133,15 @@ def build_ffmpeg_mix_command(
 ) -> list:
     """FFmpeg ミックスコマンドリストを構築する
 
-    - BGM ボリューム: -20dB
+    - BGM: normalize=0 でそのまま加算（BGM素材が元々ナレーションより静かな前提）
     - BGM が動画より長い場合は duration=first でトリミング
-    - ナレーション音量不変（BGM のみ減衰）
     """
     # bgm_path が None なら AttributeError が自然に発生
     _ = bgm_path.name  # None チェック（TypeError/AttributeError）
 
     filter_complex = (
-        "[1:a]volume=-20dB[bgm];"
-        "[0:a][bgm]amix=inputs=2:duration=first[aout]"
+        "[1:a]volume=-8dB[bgm];"
+        "[0:a][bgm]amix=inputs=2:duration=first:normalize=0[aout]"
     )
 
     return [
@@ -183,7 +186,7 @@ def main() -> int:
         )
         return 1
 
-    bgm_dir = PROJECT_ROOT / "assets" / item_id / "bgm"
+    bgm_dir = PROJECT_ROOT / "assets" / args.id / "bgm"
     output_dir = PROJECT_ROOT / "output"
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -195,11 +198,13 @@ def main() -> int:
     if bgm_path:
         logger.info(f"キャッシュ BGM を使用: {bgm_path.name}")
     else:
-        pixabay_api_key = os.getenv("PIXABAY_API_KEY")
-        if pixabay_api_key:
+        jamendo_client_id = os.getenv("JAMENDO_CLIENT_ID")
+        if jamendo_client_id:
             session = requests.Session()
             session.headers.update({"User-Agent": "NASA-Spinoff-VideoBot/1.0"})
-            bgm_path = fetch_bgm_from_pixabay(pixabay_api_key, bgm_dir, session)
+            bgm_path = fetch_bgm_from_jamendo(jamendo_client_id, bgm_dir, session)
+        else:
+            logger.warning("JAMENDO_CLIENT_ID が未設定です。.env に追加してください")
         if not bgm_path:
             logger.warning("BGM を取得できませんでした。BGM なしで続行します")
 

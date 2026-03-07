@@ -118,8 +118,8 @@ python scripts/step2_save_selection.py --url "<選択したレコードのURL>" 
       "duration_sec": 7
     }
   ],
-  "outro": "（日本語アウトロ — チャンネル登録促進）",
-  "outro_en": "（英語アウトロ）",
+  "outro": "NASAの技術が身近に潜んでいる話、もっと見たい人はチャンネル登録！",
+  "outro_en": "NASA tech is hiding in your daily life — subscribe for more!",
   "total_duration_sec": 55
 }
 ```
@@ -138,7 +138,8 @@ python scripts/step2_save_selection.py --url "<選択したレコードのURL>" 
 - 文末は「〜です。」より「〜なんです！」「〜なんだ。」「実は〜。」など感情を乗せる
 - シーン間に「驚き→説明→驚き→深掘り→まとめ」の感情の波を作る
 - hook は視聴者が「え？」となる疑問形か衝撃の一言（例:「あなたの枕、実はNASA製かも？」）
-- outro は「もっと雑学が見たい人はフォロー！」など短く強く締める（20文字以内）
+- outro は **必ず固定文言** を使う: `「NASAの技術が身近に潜んでいる話、もっと見たい人はチャンネル登録！」`（変更禁止）
+- outro_en は固定: `"NASA tech is hiding in your daily life — subscribe for more!"`
 
 **悪い例（やってはいけない）:**
 - ❌ 1シーンに2〜3文を詰め込む「〜です。〜があります。〜しています。」
@@ -178,7 +179,7 @@ python scripts/step2_save_selection.py --url "<選択したレコードのURL>" 
 承認する場合は「OK」、修正依頼は具体的に入力してください。
 ```
 
-- `total_duration_sec` が **60秒超過** の場合: 承認前にシーン圧縮案を提示する
+- `total_duration_sec` が **65秒超過** の場合: 承認前にシーン圧縮案を提示する（60秒未満の場合はStep 6で自動的にアウトロを延長して60秒に調整される）
 - 修正依頼を受けた場合: 指摘を反映して再生成（最大3回まで）
 - 3回を超えた場合: 「手動で `data/script_*.json` を編集してください」と案内して終了
 

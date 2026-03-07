@@ -128,7 +128,16 @@ def adjust_script_durations(script: dict, audio_manifest_raw: dict, lang: str) -
     hook_sec = 3
     outro_sec = 5
     content_sec = sum(s["duration_sec"] for s in script.get("scenes", []))
-    script["total_duration_sec"] = hook_sec + content_sec + outro_sec
+    total_sec = hook_sec + content_sec + outro_sec
+
+    # 最低60秒を保証: 不足分をアウトロで埋める
+    MIN_TOTAL_SEC = 60
+    if total_sec < MIN_TOTAL_SEC:
+        outro_sec += MIN_TOTAL_SEC - total_sec
+        total_sec = MIN_TOTAL_SEC
+
+    script["outro_duration_sec"] = outro_sec
+    script["total_duration_sec"] = total_sec
     return script
 
 

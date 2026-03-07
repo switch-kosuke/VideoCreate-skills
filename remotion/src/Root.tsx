@@ -53,6 +53,9 @@ export const RemotionRoot: React.FC = () => {
         width={1080}
         height={1920}
         defaultProps={defaultProps}
+        calculateMetadata={({ props }) => ({
+          durationInFrames: Math.ceil((props.script?.total_duration_sec ?? 60) * 30),
+        })}
       />
     </>
   );

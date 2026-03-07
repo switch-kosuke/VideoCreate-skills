@@ -16,6 +16,7 @@ export interface ScriptJSON {
   scenes: SceneData[];
   outro: string;
   outro_en: string;
+  outro_duration_sec?: number;
   total_duration_sec: number;
 }
 

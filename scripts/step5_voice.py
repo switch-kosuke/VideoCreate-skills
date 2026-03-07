@@ -130,11 +130,29 @@ def get_audio_duration(path: Path) -> float:
         return 0.0
 
 
+async def trim_trailing_silence(path: Path) -> None:
+    """ffmpeg で末尾の無音を削除する（-50dB以下の0.3秒以上の無音）"""
+    tmp = path.with_suffix(".tmp.mp3")
+    proc = await asyncio.create_subprocess_exec(
+        "ffmpeg", "-y", "-i", str(path),
+        "-af", "silenceremove=stop_periods=-1:stop_duration=0.3:stop_threshold=-50dB",
+        str(tmp),
+        stdout=asyncio.subprocess.DEVNULL,
+        stderr=asyncio.subprocess.DEVNULL,
+    )
+    await proc.wait()
+    if proc.returncode == 0 and tmp.exists():
+        tmp.replace(path)
+    elif tmp.exists():
+        tmp.unlink()
+
+
 async def generate_audio(text: str, voice: str, output_path: Path, rate: str = DEFAULT_RATE) -> None:
-    """edge-tts で text を voice を使って output_path に MP3 として保存する"""
+    """edge-tts で text を voice を使って output_path に MP3 として保存し、末尾の無音をトリムする"""
     output_path.parent.mkdir(parents=True, exist_ok=True)
     communicate = edge_tts.Communicate(text, voice, rate=rate)
     await communicate.save(str(output_path))
+    await trim_trailing_silence(output_path)
 
 
 async def generate_all_audio(

@@ -49,7 +49,7 @@ export function calcSceneFrames(
     return info;
   });
 
-  const outroDuration = OUTRO_SEC * fps;
+  const outroDuration = (script.outro_duration_sec ?? OUTRO_SEC) * fps;
   const outro: SceneFrameInfo = {
     start: cursor,
     end: cursor + outroDuration,
