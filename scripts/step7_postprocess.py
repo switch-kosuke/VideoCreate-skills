@@ -48,19 +48,26 @@ def build_bgm_path(filename: str, bgm_dir: Path) -> Path:
 # ---- Jamendo レスポンスパース ----
 
 def parse_jamendo_response(data: dict) -> Optional[tuple]:
-    """Jamendo API レスポンスから (audio_url, filename) を返す。結果なしは None"""
+    """Jamendo API レスポンスから商用利用可 (audio_url, filename) を返す。結果なしは None
+
+    CC BY-NC / CC BY-NC-SA / CC BY-NC-ND はスキップし、
+    CC BY / CC BY-SA / CC0 のみを採用する。
+    """
     try:
         results = data.get("results", [])
-        if not results:
-            return None
-        first = results[0]
-        audio_url = first.get("audiodownload", "") or first.get("audio", "")
-        if not audio_url:
-            return None
-        track_id = first.get("id", "track")
-        name = first.get("name", f"bgm_{track_id}").replace(" ", "_")
-        filename = f"{track_id}_{name}.mp3"
-        return audio_url, filename
+        for track in results:
+            license_url = track.get("license_ccurl", "")
+            # NC（非商用）ライセンスをスキップ
+            if "-nc" in license_url.lower():
+                continue
+            audio_url = track.get("audiodownload", "") or track.get("audio", "")
+            if not audio_url:
+                continue
+            track_id = track.get("id", "track")
+            name = track.get("name", f"bgm_{track_id}").replace(" ", "_")
+            filename = f"{track_id}_{name}.mp3"
+            return audio_url, filename
+        return None
     except Exception:
         return None
 
@@ -88,11 +95,12 @@ def fetch_bgm_from_jamendo(
             params = {
                 "client_id": client_id,
                 "format": "json",
-                "limit": 5,
+                "limit": 20,
                 "tags": tag,
                 "audiodlformat": "mp32",
                 "order": "popularity_total",
                 "durationbetween": f"{BGM_MIN_DURATION}_300",
+                "license_type": "cc_by cc_by_sa",  # 商用利用可ライセンスのみ
             }
             resp = session.get(JAMENDO_API, params=params, timeout=15)
             resp.raise_for_status()
