@@ -28,7 +28,7 @@ load_dotenv(PROJECT_ROOT / ".env")
 logger = logging.getLogger(__name__)
 
 JAMENDO_API = "https://api.jamendo.com/v3.0/tracks/"
-BGM_TAGS = ["epic", "dramatic", "orchestral"]
+BGM_TAGS = ["documentary", "discovery", "space", "inspiring"]
 BGM_MIN_DURATION = 30  # 秒
 
 
@@ -59,6 +59,10 @@ def parse_jamendo_response(data: dict) -> Optional[tuple]:
             license_url = track.get("license_ccurl", "")
             # NC（非商用）ライセンスをスキップ
             if "-nc" in license_url.lower():
+                continue
+            # instrumental と明示されたもの以外はスキップ
+            vocal = track.get("musicinfo", {}).get("vocalinstrumental", "")
+            if vocal != "instrumental":
                 continue
             audio_url = track.get("audiodownload", "") or track.get("audio", "")
             if not audio_url:
@@ -101,6 +105,7 @@ def fetch_bgm_from_jamendo(
                 "order": "popularity_total",
                 "durationbetween": f"{BGM_MIN_DURATION}_300",
                 "license_type": "cc_by cc_by_sa",  # 商用利用可ライセンスのみ
+                "include": "musicinfo",  # vocalinstrumental フィールドを取得
             }
             resp = session.get(JAMENDO_API, params=params, timeout=15)
             resp.raise_for_status()
@@ -148,7 +153,7 @@ def build_ffmpeg_mix_command(
     _ = bgm_path.name  # None チェック（TypeError/AttributeError）
 
     filter_complex = (
-        "[1:a]volume=-14dB[bgm];"
+        "[1:a]volume=-20dB[bgm];"
         "[0:a][bgm]amix=inputs=2:duration=first:normalize=0[aout]"
     )
 
