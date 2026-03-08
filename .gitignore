@@ -9,15 +9,18 @@ data/audio_manifest.json
 data/render_props.json
 
 # メディアアセット（容量大）
-assets/scene_*/
-assets/hook/
-assets/outro/
-assets/bgm/
-assets/manifest.json
+assets/
 audio/
 tmp/
 output/
 logs/
+remotion/public/
+
+# データ生成ファイル
+data/subtitle_*.srt
+
+# Claude Code ローカル設定
+.claude/settings.local.json
 
 # Python
 __pycache__/

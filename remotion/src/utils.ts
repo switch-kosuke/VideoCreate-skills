@@ -34,7 +34,7 @@ export function calcSceneFrames(
 ): AllSceneFrames {
   let cursor = 0;
 
-  const hookDuration = HOOK_SEC * fps;
+  const hookDuration = (script.hook_duration_sec ?? HOOK_SEC) * fps;
   const hook: SceneFrameInfo = {
     start: cursor,
     end: cursor + hookDuration,

@@ -28,14 +28,14 @@ load_dotenv(PROJECT_ROOT / ".env")
 logger = logging.getLogger(__name__)
 
 JAMENDO_API = "https://api.jamendo.com/v3.0/tracks/"
-BGM_TAGS = ["ambient", "cinematic"]
+BGM_TAGS = ["epic", "dramatic", "orchestral"]
 BGM_MIN_DURATION = 30  # 秒
 
 
 # ---- パス生成 ----
 
 def build_output_path(item_id: str, date_str: str, output_dir: Path) -> Path:
-    """出力 MP4 パスを返す: output/output_{item_id}_{YYYYMMDD}.mp4"""
+    """出力 MP4 パスを返す: output/{item_id}/output_{item_id}_{YYYYMMDD}.mp4"""
     date_compact = date_str.replace("-", "")
     return output_dir / f"output_{item_id}_{date_compact}.mp4"
 
@@ -140,7 +140,7 @@ def build_ffmpeg_mix_command(
     _ = bgm_path.name  # None チェック（TypeError/AttributeError）
 
     filter_complex = (
-        "[1:a]volume=-8dB[bgm];"
+        "[1:a]volume=-14dB[bgm];"
         "[0:a][bgm]amix=inputs=2:duration=first:normalize=0[aout]"
     )
 
@@ -187,7 +187,7 @@ def main() -> int:
         return 1
 
     bgm_dir = PROJECT_ROOT / "assets" / args.id / "bgm"
-    output_dir = PROJECT_ROOT / "output"
+    output_dir = PROJECT_ROOT / "output" / args.id
     output_dir.mkdir(parents=True, exist_ok=True)
 
     date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")

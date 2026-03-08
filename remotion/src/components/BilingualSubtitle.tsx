@@ -43,8 +43,8 @@ export const BilingualSubtitle: React.FC<BilingualSubtitleProps> = ({
           opacity,
           transform: `translateY(${translateY}px)`,
           textAlign: "center",
-          paddingLeft: 32,
-          paddingRight: 32,
+          paddingLeft: 72,
+          paddingRight: 72,
         }}
       >
         {/* 日本語テキスト */}
