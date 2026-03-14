@@ -108,6 +108,7 @@ python scripts/step2_save_selection.py --url "<選択したレコードのURL>" 
   "title_en": "（英語タイトル）",
   "hook": "（最初の3秒 — 驚きを演出する日本語フック文）",
   "hook_en": "（英語フック文 — 直訳でなく自然な英語意訳）",
+  "image_keywords_hook": ["英語キーワード1", "英語キーワード2"],
   "scenes": [
     {
       "id": 1,
@@ -115,6 +116,8 @@ python scripts/step2_save_selection.py --url "<選択したレコードのURL>" 
       "voiceover_en": "（英語ナレーション — 自然な意訳）",
       "visual_note": "（ビジュアル説明）",
       "image_keywords": ["英語キーワード1", "英語キーワード2"],
+      "source_url": "（省略可能）元記事URL — 実際の製品・ロボット等の写真が必要な場合のみ設定する",
+      "prefer_video": false,
       "duration_sec": 7
     }
   ],
@@ -125,33 +128,39 @@ python scripts/step2_save_selection.py --url "<選択したレコードのURL>" 
 ```
 
 **生成ルール:**
-- 口調: 「テンポよく畳み掛ける雑学ショート動画スタイル」— 一文一事実、断定調、体言止め多用
+- 口調: **テンポよい説明口調**（「〜てる」「〜んだ」「〜だ」「〜なってる」が基本）。体言止めは補助的に使う程度にとどめる
 - 英語テキスト: 直訳ではなく英語圏視聴者に自然な意訳
 - `title` は 25 文字以内
 - `image_keywords` は 2〜4 語の英語キーワード
+- `image_keywords_hook` は **必須**。動画のメインテーマを象徴する 2〜4 語の英語キーワードを設定する（汎用的な "space nasa" は禁止。例: 3Dプリント住宅なら `["3D printed house", "concrete construction"]`、魚の追跡なら `["satellite ocean fish tracking"]`）
 - `total_duration_sec` = シーン合計 + hook(3秒) + outro(5秒)
+- `source_url`: **必要なシーンにだけ設定する**。NASA/Pexelsでは入手できない実際の製品・人物・固有ロボット等の写真が必要な場合のみ元記事URL（`spinoff.nasa.gov/...`）を指定する。NASA公式写真が豊富に存在するもの（ロケット・ISS・NASA製ロボット等）は不要
+- `prefer_video`: 動いている映像が効果的なシーン（衛星軌道・魚が泳ぐ・打ち上げ等）は `true`、データマップ・歴史写真等は `false`
 
 **テンポ・構成ルール（重要）:**
-- シーン数: **6〜8シーン**（1シーンにつき1事実を完結させる）
-- 1シーンあたりの `duration_sec`: **6〜8秒**（長くても9秒まで）
-- voiceover は **25〜40文字**（読み上げ約3〜5秒）。1シーンに詰め込みすぎない
-- 文末は「〜です。」より「〜なんです！」「〜なんだ。」「実は〜。」など感情を乗せる
+- シーン数: **10〜15シーン**（多くてもOK。1シーン1事実を徹底する）
+- 1シーンあたりの `duration_sec`: **3〜4秒**（テンポよく畳み掛けるのが基本。長くても5秒まで）
+- voiceover は **15〜30文字**（1文完結で伝わる長さ。説明口調でテンポよく）
+- 文末は「〜です。」より「〜てる。」「〜んだ。」「〜だ。」「〜なってる。」など自然な断定調
 - シーン間に「驚き→説明→驚き→深掘り→まとめ」の感情の波を作る
-- hook は視聴者が「え？」となる疑問形か衝撃の一言（例:「あなたの枕、実はNASA製かも？」）
+- hook は `「〜って知ってた？」` 形式の問いかけが効果的。**主語と動詞を明確に**（「〜に頼ってる」より「NASAが〜してる」「〜から〜できる」のほうが伝わる）
 - outro は **必ず固定文言** を使う: `「NASAの技術が身近に潜んでいる話、もっと見たい人はチャンネル登録！」`（変更禁止）
 - outro_en は固定: `"NASA tech is hiding in your daily life — subscribe for more!"`
 
 **悪い例（やってはいけない）:**
+- ❌ 体言止めの連発「宇宙。衛星。追跡。魚。」（単調になる）
+- ❌ 主語が曖昧な hook「漁師が宇宙に頼ってるって知ってた？」→「宇宙に頼る」が伝わらない
 - ❌ 1シーンに2〜3文を詰め込む「〜です。〜があります。〜しています。」
 - ❌ 「〜という技術が開発されました」のような説明的な長文
-- ❌ duration_sec が10秒超え
+- ❌ duration_sec が6秒超え
 
 **良い例:**
-- ✅ Scene 1（7秒）:「実はビールの泡、宇宙技術で作られてるって知ってた？」
-- ✅ Scene 2（6秒）:「NASAが開発した圧力制御システム。それがビール工場に転用された。」
-- ✅ Scene 3（7秒）:「均一な泡立ち＝飲み心地の革命。コレ、全部NASAのおかげ。」
+- ✅ Hook:「NASAが魚の場所を知ってるって知ってた？」（主語+動詞が明確）
+- ✅ Scene 1（3秒）:「NASAの衛星、実は魚を追いかけてる。」
+- ✅ Scene 2（4秒）:「宇宙から海の色と温度を読んで、魚がどこにいるか予測するんだ。」
+- ✅ Scene 3（3秒）:「そのデータ、誰でも無料で使えるんだ。NASAが公開してる。」
 
-### 3-3. ユーザー提示・承認ループ（最大3回）
+### 3-3. ユーザー提示・承認ループ
 
 生成した台本を以下のフォーマットで提示する:
 
@@ -180,8 +189,7 @@ python scripts/step2_save_selection.py --url "<選択したレコードのURL>" 
 ```
 
 - `total_duration_sec` が **65秒超過** の場合: 承認前にシーン圧縮案を提示する（60秒未満の場合はStep 6で自動的にアウトロを延長して60秒に調整される）
-- 修正依頼を受けた場合: 指摘を反映して再生成（最大3回まで）
-- 3回を超えた場合: 「手動で `data/script_*.json` を編集してください」と案内して終了
+- 修正依頼を受けた場合: 指摘を反映して再生成
 
 ### 3-4. 台本の保存
 
@@ -211,6 +219,19 @@ python scripts/step4_fetch_assets.py --script data/script_<item_id>.json
 
 - APIキーは `.env` の `PEXELS_API_KEY` から自動読み込みされる
 - 期待出力: `assets/<item_id>/manifest.json`、`assets/<item_id>/scene_*/`・`assets/<item_id>/hook/`・`assets/<item_id>/outro/` ディレクトリ
+- **素材取得の優先順位（シーンごとに `prefer_video` で制御）:**
+  - `prefer_video: true` のシーン: NASA動画 → Pexels動画 → NASA静止画 → Pexels静止画
+  - `prefer_video: false` のシーン: NASA静止画 → 元記事画像（`source_url` 指定時）→ Pexels静止画
+  - 動画サイズは自動選択: `duration_sec <= 4` → mobile サイズ（軽量）、`>= 5` → 中画質
+  - どれも取得できなかった場合: StarField背景（fallback）
+- **hookの素材は毎回新規取得する**（台本の `image_keywords_hook` を検索キーワードとして使用し、NASA API のページとインデックスをランダム化した上で既存の hook ディレクトリを削除してから取得する。動画テーマに関連した画像が使われ、前回と同じ素材にならないことを保証。`image_keywords_hook` が未定義の場合のみ `["space", "nasa"]` にフォールバック）
+- manifest.json の `video_start_sec` フィールドで動画の再生開始秒数を指定可能（後からmanifestを編集して特定の秒数から再生開始できる）
+- manifest.json の `original_url` にシーンごとの元URLを記録する（ファイル削除後も参照可能）
+
+**素材の個別修正（Step 4完了後に実施可能）:**
+- manifest.json を直接編集して `local_path` を変更するだけで素材を差し替えできる
+- `video_start_sec` フィールドを追加すると動画の再生開始秒数を指定できる（例: `"video_start_sec": 44`）
+- 差し替え後は Step 6-1（render_props再生成）から再開する
 
 スクリプトが非ゼロ終了した場合:
 > ❌ Step 4 失敗: [エラー内容]
@@ -229,7 +250,7 @@ python scripts/step5_voice.py --script data/script_<item_id>.json
 ```
 
 - デフォルトボイス: JA=`ja-JP-NanamiNeural` / EN=`en-US-JennyNeural`
-- デフォルト速度: `+25%`（速め。変更する場合は `--rate +40%` などを追加）
+- デフォルト速度: `+40%`（YouTube Shorts 標準テンポ。変更する場合は `--rate +50%` などを追加）
 - カスタムボイスを使う場合: `--ja-voice <voice>` / `--en-voice <voice>` を追加
 - 期待出力: `audio/ja/scene_*.mp3`・`audio/en/scene_*.mp3`・`data/audio_manifest.json`
 - 各音声ファイルの実測長を manifest に記録し、Step 6 でシーン尺を自動調整する
@@ -325,8 +346,10 @@ python scripts/step8_generate_srt.py --id <item_id>
 **生成ルール:**
 - タイトル（日本語）: 30文字以内。フック文をベースに「NASAが〜」「実は〜」などの驚きワードを含める。末尾に `#Shorts` は不要
 - タイトル（英語）: 60文字以内。自然な英語で
-- 説明欄（日本語）: 3〜5文。動画の内容を簡潔にまとめ、最後に関連ハッシュタグ5〜8個
-- 説明欄（英語）: 3〜5文 + 関連ハッシュタグ5〜8個
+- 説明欄（日本語）: 3〜5文。動画の内容を簡潔にまとめ、**NASA Spinoff 引用**を追加し、最後に関連ハッシュタグ5〜8個
+- 説明欄（英語）: 3〜5文 + **NASA Spinoff 引用** + 関連ハッシュタグ5〜8個
+- 引用フォーマット（日本語）: `出典: NASA Spinoff「[記事タイトル]」\n[URL]`（URLは `data/selected_item.json` の `record.url`）
+- 引用フォーマット（英語）: `Source: NASA Spinoff — "[Article Title]"\n[URL]`
 - ハッシュタグ: `#NASA #宇宙 #雑学` など動画内容・ジャンルに合ったものを選ぶ
 
 ### 9-2. ユーザーへの提示
@@ -390,9 +413,44 @@ python scripts/step8_generate_srt.py --id <item_id>
 生成シーン数: [N] シーン（hook + [M]コンテンツ + outro）
 合計尺: [S] 秒
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+動画を確認して承認する場合は「承認」と入力してください。
+承認後、中間素材（画像・動画・音声ファイル）を自動削除します。
+元URLは assets/<item_id>/manifest.json の original_url に保持されます。
 ```
 
 ファイルサイズは以下で取得する:
 ```bash
 python -c "import os; p='output/output_<item_id>_<date>.mp4'; print(f'{os.path.getsize(p)/1024/1024:.1f} MB') if os.path.exists(p) else print('ファイルなし')"
 ```
+
+ユーザーが「承認」と入力したら、まず削除対象を dry-run で確認して以下のように提示する:
+
+```bash
+python scripts/step_cleanup_assets.py --id <item_id> --dry-run
+```
+
+提示フォーマット:
+```
+🗑️ 以下のファイルを削除します（元URLは manifest.json に保持されます）:
+   - assets/<item_id>/scene_*/ の画像・動画ファイル（[N]件）
+   - audio/ja/*.mp3、audio/en/*.mp3
+   - tmp/render_<item_id>.mp4
+   - remotion/public/assets/、remotion/public/audio/
+
+削除してよいですか？ [はい / いいえ]
+```
+
+ユーザーが「はい」と回答した場合のみ実行する:
+
+```bash
+python scripts/step_cleanup_assets.py --id <item_id>
+```
+
+完了メッセージ:
+```
+✅ 素材クリーンアップ完了
+   削除: assets/<item_id>/ の画像・動画 / audio/ の音声ファイル / tmp/ の中間ファイル
+   保持: assets/<item_id>/manifest.json（original_url でシーンごとの元URLを確認可能）
+```
+
+ユーザーが「いいえ」と回答した場合: ファイルはそのまま保持し、手動で削除できることを案内する。

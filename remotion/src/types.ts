@@ -38,10 +38,13 @@ export interface AudioManifest {
 
 export interface AssetEntry {
   scene_id: string;
-  source: "nasa" | "pexels" | "fallback";
+  source: "nasa" | "pexels" | "article" | "fallback";
+  media_type: "image" | "video";
   local_path: string;
   license: string;
   original_url: string;
+  /** 動画の再生開始秒数 (optional) */
+  video_start_sec?: number;
 }
 
 export interface AssetsManifest {

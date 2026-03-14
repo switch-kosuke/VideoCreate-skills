@@ -2,7 +2,7 @@
  * 7.3 HookScene — フックシーン（フォント1.5倍以上・スケールアップ強調エフェクト）
  */
 import React from "react";
-import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
+import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig, OffthreadVideo, staticFile } from "remotion";
 import { AssetEntry } from "../types";
 import { StarField } from "./StarField";
 import { KenBurnsImage } from "./KenBurnsImage";
@@ -43,12 +43,19 @@ export const HookScene: React.FC<HookSceneProps> = ({
   });
 
   const useFallback = !asset || asset.source === "fallback" || !asset.local_path;
+  const isVideo = !useFallback && asset?.media_type === "video";
 
   return (
     <AbsoluteFill>
       {/* 背景 */}
       {useFallback ? (
         <StarField />
+      ) : isVideo ? (
+        <OffthreadVideo
+          src={staticFile(asset!.local_path)}
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          muted
+        />
       ) : (
         <KenBurnsImage src={asset.local_path} durationFrames={durationFrames} />
       )}

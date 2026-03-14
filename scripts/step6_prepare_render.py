@@ -121,13 +121,13 @@ def adjust_script_durations(script: dict, audio_manifest_raw: dict, lang: str) -
     for scene in script.get("scenes", []):
         entry = scene_lookup.get(str(scene["id"]))
         if entry and dur_key in entry and entry[dur_key] > 0:
-            adjusted = math.ceil(entry[dur_key] + 1.0)  # 実測 + 1秒余白
+            adjusted = round(entry[dur_key] + 0.4, 1)  # 実測 + 0.4秒余白
             scene["duration_sec"] = adjusted
 
     # hook の実測長を反映（コンテンツシーンと同じく実測 + 1秒余白）
     hook_entry = scene_lookup.get("hook")
     if hook_entry and dur_key in hook_entry and hook_entry[dur_key] > 0:
-        hook_sec = math.ceil(hook_entry[dur_key] + 1.0)
+        hook_sec = round(hook_entry[dur_key] + 0.4, 1)
     else:
         hook_sec = 3
 
@@ -136,11 +136,7 @@ def adjust_script_durations(script: dict, audio_manifest_raw: dict, lang: str) -
     content_sec = sum(s["duration_sec"] for s in script.get("scenes", []))
     total_sec = hook_sec + content_sec + outro_sec
 
-    # 最低60秒を保証: 不足分をアウトロで埋める
-    MIN_TOTAL_SEC = 60
-    if total_sec < MIN_TOTAL_SEC:
-        outro_sec += MIN_TOTAL_SEC - total_sec
-        total_sec = MIN_TOTAL_SEC
+    # 最低60秒保証は廃止（アウトロ過剰膨張を防ぐ）
 
     script["hook_duration_sec"] = hook_sec
     script["outro_duration_sec"] = outro_sec
